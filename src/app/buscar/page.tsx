@@ -2,21 +2,41 @@ import { Suspense } from "react";
 import SearchBar from "@/components/SearchBar";
 import CartaoCard from "@/components/CartaoCard";
 import AdBanner from "@/components/AdBanner";
-import { Cartao } from "@/lib/types";
+import { prisma } from "@/lib/prisma";
 
 interface Props {
   searchParams: Promise<{ q?: string; categoria?: string; page?: string }>;
 }
 
 async function getCartoes(q: string, categoria: string, page: number) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const params = new URLSearchParams();
-  if (q) params.set("q", q);
-  if (categoria) params.set("categoria", categoria);
-  params.set("page", String(page));
-  const res = await fetch(`${baseUrl}/api/cartoes?${params}`, { cache: "no-store" });
-  if (!res.ok) return { cartoes: [], total: 0, totalPages: 1 };
-  return res.json() as Promise<{ cartoes: Cartao[]; total: number; totalPages: number }>;
+  const limit = 12;
+  const skip = (page - 1) * limit;
+  const where: Record<string, unknown> = { ativo: true };
+
+  if (q) {
+    where.OR = [
+      { nome: { contains: q } },
+      { profissao: { contains: q } },
+      { descricao: { contains: q } },
+      { categoria: { contains: q } },
+    ];
+  }
+
+  if (categoria) {
+    where.categoria = { contains: categoria };
+  }
+
+  const [cartoes, total] = await Promise.all([
+    prisma.cartao.findMany({
+      where,
+      orderBy: [{ destaque: "desc" }, { criadoEm: "desc" }],
+      skip,
+      take: limit,
+    }),
+    prisma.cartao.count({ where }),
+  ]);
+
+  return { cartoes, total, totalPages: Math.ceil(total / limit) };
 }
 
 export default async function BuscarPage({ searchParams }: Props) {

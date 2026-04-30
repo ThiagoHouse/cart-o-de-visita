@@ -14,8 +14,8 @@ export interface Cartao {
   categoria: string;
   ativo: boolean;
   destaque: boolean;
-  criadoEm: string;
-  atualizadoEm: string;
+  criadoEm: Date | string;
+  atualizadoEm: Date | string;
 }
 
 export const CATEGORIAS = [

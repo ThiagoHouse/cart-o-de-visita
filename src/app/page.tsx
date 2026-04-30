@@ -3,14 +3,15 @@ import Link from "next/link";
 import SearchBar from "@/components/SearchBar";
 import AdBanner from "@/components/AdBanner";
 import CartaoCard from "@/components/CartaoCard";
-import { Cartao, CATEGORIAS } from "@/lib/types";
+import { CATEGORIAS } from "@/lib/types";
+import { prisma } from "@/lib/prisma";
 
-async function getDestaques(): Promise<Cartao[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const res = await fetch(baseUrl + "/api/cartoes?page=1", { next: { revalidate: 60 } });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return (data.cartoes as Cartao[]).filter((c) => c.destaque).slice(0, 4);
+async function getDestaques() {
+  return prisma.cartao.findMany({
+    where: { ativo: true, destaque: true },
+    orderBy: { criadoEm: "desc" },
+    take: 4,
+  });
 }
 
 export default async function Home() {

@@ -2,17 +2,16 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import AdBanner from "@/components/AdBanner";
-import { Cartao } from "@/lib/types";
+import { prisma } from "@/lib/prisma";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function getCartao(id: string): Promise<Cartao | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/cartoes/${id}`, { next: { revalidate: 60 } });
-  if (!res.ok) return null;
-  return res.json();
+async function getCartao(id: string) {
+  const parsed = parseInt(id);
+  if (isNaN(parsed)) return null;
+  return prisma.cartao.findFirst({ where: { id: parsed, ativo: true } });
 }
 
 export default async function CartaoPage({ params }: Props) {
