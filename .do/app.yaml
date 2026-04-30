@@ -1,0 +1,30 @@
+name: cartao-de-visita-app
+region: nyc
+
+services:
+  - name: web
+    source_dir: /
+    github:
+      repo: SEU-USUARIO/cartao-de-visita-app   # troque pelo seu repo
+      branch: main
+      deploy_on_push: true
+    build_command: npm run build
+    run_command: npm start
+    http_port: 3000
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_PATH
+        value: /mnt/data/cartao.db
+      - key: ADMIN_SECRET
+        type: SECRET
+        value: TROQUE_POR_SENHA_SEGURA
+    routes:
+      - path: /
+
+volumes:
+  - name: cartao-data
+    size_gb: 1
+    mount_path: /mnt/data
