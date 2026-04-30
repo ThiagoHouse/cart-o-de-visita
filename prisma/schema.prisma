@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Cartao {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  profissao   String
+  descricao   String?
+  telefone    String?
+  whatsapp    String?
+  instagram   String?
+  email       String?
+  website     String?
+  logoUrl     String?
+  cidade      String?
+  estado      String?
+  categoria   String
+  ativo       Boolean  @default(true)
+  destaque    Boolean  @default(false)
+  criadoEm   DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}
+
